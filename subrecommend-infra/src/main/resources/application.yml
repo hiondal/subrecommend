@@ -1,36 +1,9 @@
 spring:
-  profiles:
-    active: dev
-  application:
-    name: subrecommend-service
-  datasource:
-    url: jdbc:mysql://localhost:3306/subrecommend?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: P@ssw0rd$
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-    database-platform: org.hibernate.dialect.MySQL8Dialect
-
-server:
-  port: 8080
-  #port: ${SERVER_PORT:8080}
-
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
-
-logging:
-  level:
-    com.subrecommend.infra: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_FQDN:http://localhost:9001}
+      name: subrecommend-service
+      profile: default
+      label: main
+  config:
+    import: "optional:configserver:"
