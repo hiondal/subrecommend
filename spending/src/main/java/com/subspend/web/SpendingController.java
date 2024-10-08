@@ -1,7 +1,8 @@
-package com.spending.api;
+package com.subspend.web;
 
-import com.spending.dto.SpendingDTO;
-import com.spending.service.SpendingService;
+import com.subspend.model.Spending;
+import com.subspend.service.SpendingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -9,12 +10,13 @@ import org.springframework.web.bind.annotation.*;
 public class SpendingController {
     private final SpendingService spendingService;
 
+    @Autowired
     public SpendingController(SpendingService spendingService) {
         this.spendingService = spendingService;
     }
 
     @PostMapping
-    public void createSpending(@RequestBody SpendingDTO spendingDTO) {
-        spendingService.createSpending(spendingDTO);
+    public Spending createSpending(@RequestBody Spending spending) {
+        return spendingService.createSpending(spending);
     }
 }

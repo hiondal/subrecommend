@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_FQDN:http://localhost:9001}
+      name: spending-service
+      profile: default
+      label: main
+  config:
+    import: "optional:configserver:"

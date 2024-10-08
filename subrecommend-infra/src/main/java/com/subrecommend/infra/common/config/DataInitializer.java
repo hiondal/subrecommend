@@ -1,4 +1,4 @@
-package com.subrecommend.infra.config;
+package com.subrecommend.infra.common.config;
 
 import com.subrecommend.infra.out.entity.*;
 import com.subrecommend.infra.out.repo.*;
@@ -22,17 +22,15 @@ public class DataInitializer {
     @Bean
     @Transactional
     public CommandLineRunner initData(ICategoryRepository categoryRepository,
-                                      ISpendingRepository spendingRepository,
                                       ISubscriptionRepository subscriptionRepository,
                                       ISubscriptionCategoryRepository subscriptionCategoryRepository) {
         return args -> {
             // 모든 데이터 삭제
-            deleteAllData(spendingRepository, subscriptionRepository, categoryRepository, subscriptionCategoryRepository);
+            deleteAllData(subscriptionRepository, categoryRepository, subscriptionCategoryRepository);
 
             // 데이터 재생성
             List<CategoryEntity> categories = initCategories(categoryRepository);
             List<SubscriptionCategoryEntity> subscriptionCategories = initSubscriptionCategories(subscriptionCategoryRepository);
-            initSpendings(spendingRepository, categories);
 
             Map<String, SubscriptionCategoryEntity> categoryMap = subscriptionCategories.stream()
                     .collect(Collectors.toMap(SubscriptionCategoryEntity::getName, category -> category));
@@ -40,11 +38,9 @@ public class DataInitializer {
         };
     }
 
-    private void deleteAllData(ISpendingRepository spendingRepository,
-                               ISubscriptionRepository subscriptionRepository,
+    private void deleteAllData(ISubscriptionRepository subscriptionRepository,
                                ICategoryRepository categoryRepository,
                                ISubscriptionCategoryRepository subscriptionCategoryRepository) {
-        spendingRepository.deleteAll();
         subscriptionRepository.deleteAll();
         categoryRepository.deleteAll();
         subscriptionCategoryRepository.deleteAll();
@@ -65,29 +61,6 @@ public class DataInitializer {
         category.setName(name);
         category.setImage(image);
         return category;
-    }
-
-    private void initSpendings(ISpendingRepository spendingRepository, List<CategoryEntity> categories) {
-        String userId = "user1";
-        LocalDate baseDate = LocalDate.of(2024, 9, 1);
-
-        List<SpendingEntity> spendings = new ArrayList<>();
-        for (CategoryEntity category : categories) {
-            BigDecimal amount = category.getName().equals(HIGHEST_SPENDING_CATEGORY)
-                    ? new BigDecimal("580000")
-                    : new BigDecimal(String.valueOf((100000 + new Random().nextInt(200000))));
-            spendings.add(createSpending(userId, category.getName(), amount, baseDate.plusDays(new Random().nextInt(30))));
-        }
-        spendingRepository.saveAll(spendings);
-    }
-
-    private SpendingEntity createSpending(String userId, String category, BigDecimal amount, LocalDate date) {
-        SpendingEntity spending = new SpendingEntity();
-        spending.setUserId(userId);
-        spending.setCategory(category);
-        spending.setAmount(amount);
-        spending.setDate(date);
-        return spending;
     }
 
     private List<SubscriptionCategoryEntity> initSubscriptionCategories(ISubscriptionCategoryRepository repository) {

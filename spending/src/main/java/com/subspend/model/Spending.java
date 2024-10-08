@@ -1,4 +1,4 @@
-package com.subrecommend.infra.out.entity;
+package com.subspend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "spendings")
 @Data
-public class SpendingEntity {
+public class Spending {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
