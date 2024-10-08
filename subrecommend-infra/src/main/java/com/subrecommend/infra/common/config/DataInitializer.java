@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Configuration
-@Profile("dev")
+//@Profile("dev")
 public class DataInitializer {
 
     private static final String HIGHEST_SPENDING_CATEGORY = "식비";
