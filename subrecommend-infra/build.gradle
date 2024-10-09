@@ -16,5 +16,5 @@ dependencies {
 
 bootJar {
     enabled = true
-    archiveFileName = subrecommend.jar
+    archiveFileName = "subrecommend.jar"
 }

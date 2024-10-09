@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
+@Slf4j
 public class RabbitMQConfig {
     @Value("${spring.rabbitmq.host}")
     private String host;
@@ -24,6 +27,7 @@ public class RabbitMQConfig {
     @Value("${spring.rabbitmq.port}")
     private int port;
 
+    // RabbitMQ 연결 팩토리 빈 생성
     @Bean
     ConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
@@ -31,51 +35,27 @@ public class RabbitMQConfig {
         connectionFactory.setPort(port);
         connectionFactory.setUsername(username);
         connectionFactory.setPassword(password);
+
+        log.info("RabbitMQ 연결 팩토리가 생성되었습니다. host={}, port={}", host, port);
+
         return connectionFactory;
     }
 
+    // JSON 메시지 변환기 빈 생성
     @Bean
     MessageConverter messageConverter() {
+        log.info("JSON 메시지 변환기가 생성되었습니다.");
         return new Jackson2JsonMessageConverter();
     }
 
+    // RabbitTemplate 빈 생성
     @Bean
     RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(messageConverter);
+
+        log.info("RabbitTemplate이 생성되었습니다.");
+
         return rabbitTemplate;
-    }
-
-    @Bean
-    public Exchange spendingExchange() {
-        return new TopicExchange("spending-exchange");
-    }
-
-    @Bean
-    public Queue spendingUpdatedQueue() {
-        return QueueBuilder.durable("spending-updated-queue")
-                .withArgument("x-dead-letter-exchange", "spending-dlx-exchange")
-                .withArgument("x-dead-letter-routing-key", "spending-updated.dlx")
-                .build();
-    }
-
-    @Bean
-    public Binding spendingUpdatedBinding(Queue spendingUpdatedQueue, TopicExchange spendingExchange) {
-        return BindingBuilder.bind(spendingUpdatedQueue).to(spendingExchange).with("spending.updated");
-    }
-
-    @Bean
-    public Exchange spendingDlxExchange() {
-        return new FanoutExchange("spending-dlx-exchange");
-    }
-
-    @Bean
-    public Queue spendingUpdatedDlxQueue() {
-        return QueueBuilder.durable("spending-updated-dlx-queue").build();
-    }
-
-    @Bean
-    public Binding spendingUpdatedDlxBinding(Queue spendingUpdatedDlxQueue, FanoutExchange spendingDlxExchange) {
-        return BindingBuilder.bind(spendingUpdatedDlxQueue).to(spendingDlxExchange);
     }
 }
