@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import com.subspend.config.CommonVars;
 
 @Service
 @Slf4j
@@ -69,7 +70,7 @@ public class SpendingService {
 
             log.info("최다 지출 카테고리 정보를 RabbitMQ로 전송: {}", topSpending);
 
-            rabbitTemplate.convertAndSend("spending-exchange", "spending.updated", topSpending);
+            rabbitTemplate.convertAndSend(CommonVars.exchangeName, CommonVars.routingKey, topSpending);
         }
     }
 }

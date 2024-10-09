@@ -15,6 +15,8 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.subspend.config.CommonVars;
+
 /**
  * 애플리케이션 시작 시 초기 데이터를 생성하고 RabbitMQ를 통해 최고 지출 카테고리 정보를 전송하는 클래스
  */
@@ -23,29 +25,43 @@ import java.util.stream.Collectors;
 public class DataInitializer implements CommandLineRunner {
     private final SpendingRepository spendingRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final RabbitMQConfig rabbitMQConfig;
 
     /**
-     * SpendingRepository와 RabbitTemplate을 주입받는 생성자
+     * SpendingRepository, RabbitTemplate, RabbitMQConfig를 주입받는 생성자
      *
      * @param spendingRepository 지출 정보를 저장하는 리포지토리
      * @param rabbitTemplate RabbitMQ 메시지 전송을 위한 템플릿
+     * @param rabbitMQConfig RabbitMQ 설정 정보를 담은 클래스
      */
     @Autowired
-    public DataInitializer(SpendingRepository spendingRepository, RabbitTemplate rabbitTemplate) {
+    public DataInitializer(SpendingRepository spendingRepository, RabbitTemplate rabbitTemplate, RabbitMQConfig rabbitMQConfig) {
         this.spendingRepository = spendingRepository;
         this.rabbitTemplate = rabbitTemplate;
-        log.info("DataInitializer가 초기화되었습니다. SpendingRepository: {}, RabbitTemplate: {}", spendingRepository, rabbitTemplate);
+        this.rabbitMQConfig = rabbitMQConfig;
+        log.info("DataInitializer가 초기화되었습니다. SpendingRepository: {}, RabbitTemplate: {}, RabbitMQConfig: {}", spendingRepository, rabbitTemplate, rabbitMQConfig);
     }
 
     /**
      * 애플리케이션 시작 시 실행되는 메서드
+     * 기존 데이터를 삭제하고 샘플 데이터를 생성
      *
      * @param args 커맨드라인 인수
      */
     @Override
     public void run(String... args) {
         log.info("DataInitializer의 run 메서드가 실행됩니다.");
+        deleteAllData();
         initSampleData();
+    }
+
+    /**
+     * 기존 지출 데이터를 모두 삭제하는 메서드
+     */
+    private void deleteAllData() {
+        log.info("기존 지출 데이터를 모두 삭제합니다.");
+        spendingRepository.deleteAll();
+        log.info("기존 지출 데이터가 모두 삭제되었습니다.");
     }
 
     /**
@@ -70,10 +86,10 @@ public class DataInitializer implements CommandLineRunner {
     /**
      * 지출 정보 객체를 생성하는 메서드
      *
-     * @param userId 사용자 ID
+     * @param userId   사용자 ID
      * @param category 지출 카테고리
-     * @param amount 지출 금액
-     * @param date 지출 일자
+     * @param amount   지출 금액
+     * @param date     지출 일자
      * @return 생성된 Spending 객체
      */
     private Spending createSpending(String userId, String category, BigDecimal amount, LocalDate date) {
@@ -118,8 +134,9 @@ public class DataInitializer implements CommandLineRunner {
             topSpending.setUserId(userId);
             log.debug("TopSpendingDTO 객체를 생성했습니다. {}", topSpending);
 
-            rabbitTemplate.convertAndSend("spending-exchange", "spending.updated", topSpending);
-            log.info("최고 지출 카테고리 정보를 RabbitMQ로 전송했습니다. userId: {}, topCategory: {}", userId, topCategory);
+            rabbitTemplate.convertAndSend(CommonVars.exchangeName, CommonVars.routingKey, topSpending);
+            log.info("최고 지출 카테고리 정보를 RabbitMQ로 전송했습니다. Exchange: {}, RoutingKey: {}, TopSpending: {}",
+                    CommonVars.exchangeName, CommonVars.routingKey, topSpending);
         } else {
             log.warn("최고 지출 카테고리가 없습니다. userId: {}", userId);
         }
