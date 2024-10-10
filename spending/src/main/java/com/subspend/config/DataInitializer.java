@@ -2,20 +2,15 @@ package com.subspend.config;
 
 import com.subspend.model.Spending;
 import com.subspend.repository.SpendingRepository;
-import com.subrecommend.biz.dto.TopSpendingDTO;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.subspend.config.CommonVars;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 애플리케이션 시작 시 초기 데이터를 생성하고 RabbitMQ를 통해 최고 지출 카테고리 정보를 전송하는 클래스
@@ -24,22 +19,11 @@ import com.subspend.config.CommonVars;
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
     private final SpendingRepository spendingRepository;
-    private final RabbitTemplate rabbitTemplate;
-    private final RabbitMQConfig rabbitMQConfig;
 
-    /**
-     * SpendingRepository, RabbitTemplate, RabbitMQConfig를 주입받는 생성자
-     *
-     * @param spendingRepository 지출 정보를 저장하는 리포지토리
-     * @param rabbitTemplate RabbitMQ 메시지 전송을 위한 템플릿
-     * @param rabbitMQConfig RabbitMQ 설정 정보를 담은 클래스
-     */
     @Autowired
-    public DataInitializer(SpendingRepository spendingRepository, RabbitTemplate rabbitTemplate, RabbitMQConfig rabbitMQConfig) {
+    public DataInitializer(SpendingRepository spendingRepository) {
         this.spendingRepository = spendingRepository;
-        this.rabbitTemplate = rabbitTemplate;
-        this.rabbitMQConfig = rabbitMQConfig;
-        log.info("DataInitializer가 초기화되었습니다. SpendingRepository: {}, RabbitTemplate: {}, RabbitMQConfig: {}", spendingRepository, rabbitTemplate, rabbitMQConfig);
+
     }
 
     /**
@@ -80,7 +64,6 @@ public class DataInitializer implements CommandLineRunner {
         List<Spending> savedSpendings = spendingRepository.saveAll(spendings);
         log.info("샘플 지출 데이터가 저장되었습니다. 저장된 지출 데이터 수: {}", savedSpendings.size());
 
-        sendTopSpendingUpdatedEvent("user1");
     }
 
     /**
@@ -105,40 +88,4 @@ public class DataInitializer implements CommandLineRunner {
         return spending;
     }
 
-    /**
-     * 최고 지출 카테고리 정보를 RabbitMQ를 통해 전송하는 메서드
-     *
-     * @param userId 사용자 ID
-     */
-    private void sendTopSpendingUpdatedEvent(String userId) {
-        log.info("최고 지출 카테고리 정보를 전송합니다. userId: {}", userId);
-
-        List<Spending> userSpendings = spendingRepository.findByUserId(userId);
-        log.debug("사용자의 지출 정보를 조회했습니다. userId: {}, 조회된 지출 정보 수: {}", userId, userSpendings.size());
-
-        Map<String, BigDecimal> categorySpending = userSpendings.stream()
-                .collect(Collectors.groupingBy(Spending::getCategory,
-                        Collectors.reducing(BigDecimal.ZERO, Spending::getAmount, BigDecimal::add)));
-        log.debug("카테고리별 지출 금액을 계산했습니다. {}", categorySpending);
-
-        String topCategory = categorySpending.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse(null);
-        log.debug("최고 지출 카테고리를 파악했습니다. topCategory: {}", topCategory);
-
-        if (topCategory != null) {
-            TopSpendingDTO topSpending = new TopSpendingDTO();
-            topSpending.setTopCategory(topCategory);
-            topSpending.setTotalSpending(categorySpending.get(topCategory));
-            topSpending.setUserId(userId);
-            log.debug("TopSpendingDTO 객체를 생성했습니다. {}", topSpending);
-
-            rabbitTemplate.convertAndSend(CommonVars.exchangeName, CommonVars.routingKey, topSpending);
-            log.info("최고 지출 카테고리 정보를 RabbitMQ로 전송했습니다. Exchange: {}, RoutingKey: {}, TopSpending: {}",
-                    CommonVars.exchangeName, CommonVars.routingKey, topSpending);
-        } else {
-            log.warn("최고 지출 카테고리가 없습니다. userId: {}", userId);
-        }
-    }
 }

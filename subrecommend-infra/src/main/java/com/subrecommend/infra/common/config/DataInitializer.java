@@ -1,23 +1,25 @@
 package com.subrecommend.infra.common.config;
 
-import com.subrecommend.infra.out.entity.*;
-import com.subrecommend.infra.out.repo.*;
+import com.subrecommend.infra.out.entity.CategoryEntity;
+import com.subrecommend.infra.out.entity.SubscriptionCategoryEntity;
+import com.subrecommend.infra.out.entity.SubscriptionEntity;
+import com.subrecommend.infra.out.repo.ICategoryRepository;
+import com.subrecommend.infra.out.repo.ISubscriptionCategoryRepository;
+import com.subrecommend.infra.out.repo.ISubscriptionRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Configuration
 //@Profile("dev")
 public class DataInitializer {
-
-    private static final String HIGHEST_SPENDING_CATEGORY = "식비";
 
     @Bean
     @Transactional

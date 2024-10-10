@@ -3,14 +3,14 @@ package com.subrecommend.infra.out.adapter;
 import com.subrecommend.biz.dto.TopSpendingDTO;
 import com.subrecommend.biz.usecase.outport.ITopSpendingViewProvider;
 import com.subrecommend.infra.out.entity.TopSpendingView;
-import com.subrecommend.infra.out.repo.TopSpendingViewRepository;
+import com.subrecommend.infra.out.repo.ITopSpendingViewRepository;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TopSpendingViewProviderImpl implements ITopSpendingViewProvider {
-    private final TopSpendingViewRepository topSpendingViewRepository;
+    private final ITopSpendingViewRepository topSpendingViewRepository;
 
-    public TopSpendingViewProviderImpl(TopSpendingViewRepository topSpendingViewRepository) {
+    public TopSpendingViewProviderImpl(ITopSpendingViewRepository topSpendingViewRepository) {
         this.topSpendingViewRepository = topSpendingViewRepository;
     }
 
