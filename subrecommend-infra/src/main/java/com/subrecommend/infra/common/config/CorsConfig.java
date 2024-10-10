@@ -8,6 +8,8 @@ import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 public class CorsConfig {
+    @Value("${AllowedOrigin}")
+    private String allowedOrigin;
 
     @Bean
     public CorsFilter corsFilter() {
@@ -15,7 +17,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // 허용할 오리진 설정
-        config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedOrigin(allowedOrigin);
 
         // 허용할 헤더 설정
         config.addAllowedHeader("*");
