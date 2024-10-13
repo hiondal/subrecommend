@@ -13,7 +13,7 @@ import org.springframework.web.filter.CorsFilter;
 public class CorsConfig {
     private static final Logger logger = LogManager.getLogger(CorsConfig.class);
 
-    @Value("${AllowedOrigins}")
+    @Value("${FRONT_HOST:http://localhost:3000}")
     private String allowedOrigin;
 
     @Bean
