@@ -36,10 +36,6 @@ subprojects {
         }
     }
 
-    //test {
-    //    useJUnitPlatform()
-    //}
-
     jacoco {
         toolVersion = "0.8.8" // 사용할 JaCoCo 버전 지정
     }
