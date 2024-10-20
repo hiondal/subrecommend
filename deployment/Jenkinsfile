@@ -37,7 +37,7 @@ podTemplate(
         containerTemplate(name: "trivy", image: "aquasec/trivy", ttyEnabled: true, command: "cat"),
         containerTemplate(name: "kubectl", image: "lachlanevenson/k8s-kubectl", command: "cat", ttyEnabled: true),
         containerTemplate(name: "gradle", image: "gradle:jdk17", ttyEnabled: true, command: "cat"),
-        containerTemplate(name: 'podman', image: "quay.io/podman/stable", ttyEnabled: true, command: 'cat', privileged: true),
+        containerTemplate(name: 'podman', image: "mgoltzsche/podman", ttyEnabled: true, command: 'cat', privileged: true),
         containerTemplate(name: 'envsubst', image: "hiondal/envsubst", command: 'sleep', args: '1h')
     ],
     volumes: [
