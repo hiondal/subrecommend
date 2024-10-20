@@ -109,13 +109,6 @@ podTemplate(
                                     -Dsonar.projectName=${SONAR_PROJECT_KEY} \
                                     -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                                     -Dsonar.java.binaries=${javaBinaries}
-
-                                gradle \
-                                    :${SUB_DIR_BIZ}:sonar \
-                                    -Dsonar.projectName=${SONAR_PROJECT_KEY} \
-                                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                                    -Dsonar.java.binaries=${javaBinaries}
-
                             """
                         }
                     }
