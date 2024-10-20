@@ -1,0 +1,164 @@
+# deploy.yaml.template
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${APP_NAME}
+  namespace: ${NAMESPACE}
+  labels:
+    app: ${APP_NAME}
+spec:
+  selector:
+    matchLabels:
+      app: ${APP_NAME}
+  replicas: ${REPLICAS}
+  template:
+    metadata:
+      name: ${APP_NAME}
+      labels:
+        app: ${APP_NAME}
+    spec:
+      serviceAccount: ${SERVICE_ACCOUNT}
+      imagePullSecrets:
+        - name: ${IMAGE_PULL_SECRET}
+      containers:
+        - name: ${APP_NAME}
+          image: ${IMAGE_REG_HOST}/${IMAGE_REG_ORG}/${APP_NAME}:${IMAGE_TAG}
+          imagePullPolicy: ${IMAGE_PULL_POLICY}
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: APPLICATION_NAME
+              value: ${APP_NAME}
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          envFrom:
+          - configMapRef:
+              name: ${SUBRIDE_CONFIG_MAP}
+          - configMapRef:
+              name: ${APP_CONFIG_MAP}
+          - secretRef:
+              name: ${SUBRIDE_SECRET}
+          ports:
+            - name: container-port
+              containerPort: ${SERVICE_PORT}
+          resources:
+            requests:
+              cpu: ${CPU_REQUEST}
+              memory: ${MEMORY_REQUEST}
+            limits:
+              cpu: ${CPU_LIMIT}
+              memory: ${MEMORY_LIMIT}
+          startupProbe:
+            exec:
+              command:
+                - "/bin/sh"
+                - "-c"
+                - "${STARTUP_COMMAND}"
+            initialDelaySeconds: ${STARTUP_DELAY}
+            periodSeconds: ${STARTUP_PERIOD}
+            failureThreshold: ${STARTUP_FAILURE_THRESHOLD}
+          readinessProbe:
+            httpGet:
+              path: ${READINESS_PATH}
+              port: ${SERVICE_PORT}
+              scheme: ${READINESS_SCHEME}
+            initialDelaySeconds: ${READINESS_DELAY}
+            periodSeconds: ${READINESS_PERIOD}
+            failureThreshold: ${READINESS_FAILURE_THRESHOLD}
+          livenessProbe:
+            httpGet:
+              path: ${LIVENESS_PATH}
+              port: ${SERVICE_PORT}
+              scheme: ${LIVENESS_SCHEME}
+            initialDelaySeconds: ${LIVENESS_DELAY}
+            periodSeconds: ${LIVENESS_PERIOD}
+            failureThreshold: ${LIVENESS_FAILURE_THRESHOLD}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ${SUBRIDE_CONFIG_MAP}
+  namespace: ${NAMESPACE}
+data:
+  CONFIG_SERVER_FQDN: ${CONFIG_SERVER_FQDN}
+  EUREKA_SERVERS: ${EUREKA_SERVERS}
+  DB_DRIVER: ${DB_DRIVER}
+  FRONT_HOST: ${FRONT_HOST}
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: ${SUBRIDE_SECRET}
+  namespace: ${NAMESPACE}
+type: Opaque
+stringData:
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+  DB_PASSWORD: ${DB_PASSWORD}
+  JWT_SECRET: ${JWT_SECRET}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ${APP_CONFIG_MAP}
+  namespace: ${NAMESPACE}
+data:
+  SPRING_APPLICATION_NAME: ${APP_NAME}-service
+  HOSTNAME: ${APP_NAME}
+  SERVER_PORT: "${SERVICE_PORT}"
+  DB_URL: ${DB_URL}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${APP_NAME}
+  namespace: ${NAMESPACE}
+spec:
+  type: ${SERVICE_TYPE}
+  selector:
+    app: ${APP_NAME}
+  ports:
+    - name: ${APP_NAME}
+      port: ${SERVICE_PORT}
+      targetPort: ${SERVICE_PORT}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${APP_NAME}-headless
+  namespace: ${NAMESPACE}
+spec:
+  clusterIP: None
+  selector:
+    app: ${APP_NAME}
+  ports:
+    - name: ${APP_NAME}
+      port: ${SERVICE_PORT}
+      targetPort: ${SERVICE_PORT}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${APP_NAME}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "${SSL_REDIRECT}"
+spec:
+  ingressClassName: ${INGRESS_CLASS}
+  rules:
+    - host: ${INGRESS_HOST}
+      http:
+        paths:
+          - path: ${INGRESS_PATH}
+            pathType: ${INGRESS_PATH_TYPE}
+            backend:
+              service:
+                name: ${APP_NAME}
+                port:
+                  number: ${SERVICE_PORT}
