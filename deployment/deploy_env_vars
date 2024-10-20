@@ -7,7 +7,7 @@ PROJECT_DIR=subrecommend
 SUB_DIR_INFRA=subrecommend-infra
 SUB_DIR_BIZ=subrecommend-biz
 SONAR_PROJECT_KEY=subrecommend-user15
-USE_ARGOCD=true
+USE_ARGOCD=false
 
 # ArgoCD 이용 시
 GIT_ACCESS_CREDENTIAL=github_access_token_user15
