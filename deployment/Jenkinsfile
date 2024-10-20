@@ -99,17 +99,17 @@ podTemplate(
                 stage("SonarQube Analysis") {
                     def prjName = "${SUB_DIR_INFRA}"
                     def javaBinaries = "${SUB_DIR_INFRA}/build/classes/java/main,${SUB_DIR_BIZ}/build/classes/java/main"
-                    def jacocoReportDir = "${SUB_DIR_INFRA}/build/reports/jacoco/test/jacocoTestReport.xml,${SUB_DIR_BIZ}/build/reports/jacoco/test/jacocoTestReport.xml"
+                    //def jacocoReportDir = "${SUB_DIR_INFRA}/build/reports/jacoco/test/jacocoTestReport.xml,${SUB_DIR_BIZ}/build/reports/jacoco/test/jacocoTestReport.xml"
 
                     container('gradle') {
                         withSonarQubeEnv("${SONAR_SERVER_ID}") {
                             sh """
-                                gradle :${prjName}:test :${prjName}:jacocoTestReport :${prjName}:sonar \
+                                gradle :${prjName}:sonar \
                                     -Dsonar.projectName=${SONAR_PROJECT_KEY} \
                                     -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                                     -Dsonar.java.binaries=${javaBinaries} \
-                                    -Dsonar.coverage.jacoco.xmlReportPaths=${jacocoReportDir} \
-                                    --info
+                                    #-Dsonar.coverage.jacoco.xmlReportPaths=${jacocoReportDir} \
+                                    #--info
                             """
                         }
                     }
