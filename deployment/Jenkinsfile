@@ -98,17 +98,17 @@ podTemplate(
             if(!skipStages.contains("sona")) {
                 stage("SonarQube Analysis") {
                     def prjName = "${SUB_DIR_INFRA}"
-                    def javaBinaries = "${SUB_DIR_INFRA}/build/classes/java/main,${SUB_DIR_BIZ}/build/classes/java/main"
-                    //def jacocoReportDir = "${SUB_DIR_INFRA}/build/reports/jacoco/test/jacocoTestReport.xml,${SUB_DIR_BIZ}/build/reports/jacoco/test/jacocoTestReport.xml"
+                    //def javaBinaries = "${SUB_DIR_INFRA}/build/classes/java/main,${SUB_DIR_BIZ}/build/classes/java/main"
+                    def javaBinaries = "build/classes/java/main"
 
                     container('gradle') {
                         withSonarQubeEnv("${SONAR_SERVER_ID}") {
                             sh """
                                 gradle \
-                                    sonar \
+                                    :${prjName}:sonar \
                                     -Dsonar.projectName=${SONAR_PROJECT_KEY} \
                                     -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                                    -Dsonar.java.binaries=${javaBinaries} \
+                                    -Dsonar.java.binaries=${javaBinaries}
 
                             """
                         }
