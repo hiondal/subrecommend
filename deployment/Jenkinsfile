@@ -207,8 +207,8 @@ podTemplate(
 
             if("${USE_ARGOCD}" == "true") {
                 stage("Update manifest") {
-                    withCredentials([usernamePassword(credentialsId: "${GIT_ACCESS_CREDENTIAL}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GITHUB_TOKEN')]) {
-                        sh "git clone https://${GIT_USERNAME}:${GITHUB_TOKEN}@${MANIFEST_REPO}"
+                    withCredentials([usernamePassword(credentialsId: "${GIT_ACCESS_CREDENTIAL}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]) {
+                        sh "git clone https://${GIT_USERNAME}:${GIT_TOKEN}@${MANIFEST_REPO}"
 
                         sh "mkdir -p ${MANIFEST_REPO_DIR}/${MANIFEST_DIR}"
                         sh "cp -f ${BASEDIR}/${MANIFEST_FILENAME} ${MANIFEST_REPO_DIR}/${MANIFEST_DIR}/${MANIFEST_FILENAME}"
@@ -221,7 +221,7 @@ podTemplate(
                                     git config user.name "Jenkins"
                                     git add ${MANIFEST_DIR}/${MANIFEST_FILENAME}
                                     git commit -m "Update ${MANIFEST_DIR}/${MANIFEST_FILENAME}"
-                                    git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@${MANIFEST_REPO} HEAD:main
+                                    git push https://${GIT_USERNAME}:${GIT_TOKEN}@${MANIFEST_REPO} HEAD:main
                                 """
                             } catch (e) {
                                 echo "Error occurred while push Deploy yaml. but keep going: ${e}"
