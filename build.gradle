@@ -22,6 +22,7 @@ subprojects {
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'org.sonarqube'
+    apply plugin: 'jacoco' // 서브 프로젝트에 JaCoCo 플러그인 적용
 
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter'
@@ -35,7 +36,25 @@ subprojects {
         }
     }
 
+    //test {
+    //    useJUnitPlatform()
+    //}
+
+    jacoco {
+        toolVersion = "0.8.8" // 사용할 JaCoCo 버전 지정
+    }
+
     test {
-        useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.required = true
+            csv.required = false
+            html.required = true
+            html.outputLocation = layout.buildDirectory.dir("jacocoHtml").get().asFile
+        }
     }
 }
