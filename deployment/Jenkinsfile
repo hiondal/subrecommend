@@ -104,7 +104,10 @@ podTemplate(
                     container('gradle') {
                         withSonarQubeEnv("${SONAR_SERVER_ID}") {
                             sh """
-                                gradle :${prjName}:sonar \
+                                gradle \
+                                    :${SUB_DIR_INFRA}:clean ${SUB_DIR_INFRA}:compileJava \
+                                    :${SUB_DIR_BIZ}:clean ${SUB_DIR_BIZ}:compileJava \
+                                    :${prjName}:sonar \
                                     -Dsonar.projectName=${SONAR_PROJECT_KEY} \
                                     -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                                     -Dsonar.java.binaries=${javaBinaries} \
