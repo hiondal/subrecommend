@@ -53,7 +53,7 @@ FRONT_HOST=http://user15.subride-front.msa.edutdc.com
 RABBITMQ_PASSWORD=guest
 DB_PASSWORD=P@ssw0rd$
 JWT_SECRET=8O2HQ13etL2BWZvYOiWsJ5uWFoLi6NBUG8divYVoCgtHVvlk3dqRksMl16toztDUeBTSIuOOPvHIrYq11G2BwQ==
-DB_URL=jdbc:mysql://mysql-primary-headless:3306/subrecommend?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul
+DB_URL="jdbc:mysql://mysql-primary-headless:3306/subrecommend?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul"
 SERVICE_TYPE=ClusterIP
 INGRESS_HOST=user15.subrecommend.msa.edutdc.com
 SSL_REDIRECT=false
